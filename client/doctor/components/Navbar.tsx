@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation"; // Current page check karne ke liye
 import { Button } from "@/components/ui/button";
 import { HeartPulse, Menu, X, User } from "lucide-react";
 import { APP_CONFIG } from "../../constant.js";
@@ -7,8 +8,12 @@ import Link from "next/link.js";
 
 const Navbar = () => {
   const { name } = APP_CONFIG;
+  const pathname = usePathname(); // Path check karega (e.g., "/", "/contact")
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Home page check logic
+  const isHomePage = pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,13 +23,22 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Background color logic
+  // Agar Home page hai to scroll pe change ho, varna hamesha solid rahe
+  const navBg =
+    !isHomePage || isScrolled
+      ? "bg-white border-b border-slate-100 py-3 shadow-md"
+      : "bg-transparent py-6";
+
+  const textColor = !isHomePage || isScrolled ? "text-slate-900" : "text-white";
+  const linkColor =
+    !isHomePage || isScrolled
+      ? "text-slate-600 hover:text-red-600"
+      : "text-slate-300 hover:text-white";
+
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-        isScrolled
-          ? "bg-[#0f172a]/90 backdrop-blur-md border-b border-white/5 py-3 shadow-2xl"
-          : "bg-transparent py-6"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${navBg}`}
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-20 flex items-center justify-between">
         {/* LOGO */}
@@ -32,22 +46,28 @@ const Navbar = () => {
           <div className="bg-red-600 p-2 rounded-xl group-hover:scale-110 transition-all shadow-lg shadow-red-600/30">
             <HeartPulse className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-black tracking-tighter text-white uppercase">
+          <span
+            className={`text-2xl font-black tracking-tighter uppercase ${textColor}`}
+          >
             {name}
             <span className="text-red-600">.</span>
           </span>
         </Link>
 
-        {/* NAVIGATION with Left-to-Right Hover Bar */}
+        {/* NAVIGATION */}
         <div className="hidden md:flex items-center gap-10">
-          {["Home", "Services", "About", "Contact"].map((item) => (
+          {[
+            { name: "Home", path: "/" },
+            { name: "Services", path: "/service" },
+            { name: "About", path: "/#about" },
+            { name: "Contact", path: "/contact" }, // Agar apka contact page alag file ha
+          ].map((item) => (
             <Link
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              className="relative text-[12px] uppercase tracking-[0.2em] text-slate-300 hover:text-white transition-colors group py-2"
+              key={item.name}
+              href={item.path}
+              className={`relative text-[11px] font-bold uppercase tracking-[0.2em] transition-colors group py-2 ${linkColor}`}
             >
-              {item}
-              {/* The Hover Bar Logic */}
+              {item.name}
               <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-red-600 transition-all duration-300 group-hover:w-full"></span>
             </Link>
           ))}
@@ -55,7 +75,7 @@ const Navbar = () => {
 
         {/* ACTIONS */}
         <div className="hidden md:flex items-center gap-5">
-          <Button className="bg-red-600 cursor-pointer hover:bg-red-700 text-white rounded-md font-bold px-6 h-11 shadow-[0_10px_20px_rgba(220,38,38,0.2)] flex gap-2 active:scale-95 transition-all">
+          <Button className="bg-red-600 cursor-pointer hover:bg-red-700 text-white rounded-lg font-bold px-6 h-11 shadow-lg shadow-red-600/20 flex gap-2 active:scale-95 transition-all">
             <User className="w-4 h-4" />
             Patient Login
           </Button>
@@ -63,7 +83,7 @@ const Navbar = () => {
 
         {/* MOBILE TOGGLE */}
         <button
-          className="md:hidden text-white"
+          className={`md:hidden ${textColor}`}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X /> : <Menu />}
@@ -72,18 +92,23 @@ const Navbar = () => {
 
       {/* MOBILE MENU */}
       {isMobileMenuOpen && (
-        <div className="absolute top-full left-0 right-0 bg-[#0f172a] border-b border-white/10 p-8 flex flex-col gap-6 md:hidden animate-in fade-in slide-in-from-top-4 duration-300">
-          {["Home", "Services", "About", "Contact"].map((item) => (
+        <div className="absolute top-full left-0 right-0 bg-white border-b border-slate-100 p-8 flex flex-col gap-6 md:hidden animate-in fade-in slide-in-from-top-4 duration-300">
+          {[
+            { name: "Home", path: "/" },
+            { name: "Services", path: "/service" },
+            { name: "About", path: "/#about" },
+            { name: "Contact", path: "/contact" },
+          ].map((item) => (
             <Link
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              className="text-lg font-bold text-white border-l-2 border-transparent hover:border-red-600 pl-4 transition-all"
+              key={item.name}
+              href={item.path}
+              className="text-lg font-bold text-slate-900 border-l-4 border-transparent hover:border-red-600 pl-4 transition-all"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              {item}
+              {item.name}
             </Link>
           ))}
-          <Button className="bg-red-600 w-full h-12 rounded-md cursor-pointer">
+          <Button className="bg-red-600 w-full h-12 rounded-lg font-bold shadow-lg shadow-red-600/20">
             Patient Login
           </Button>
         </div>

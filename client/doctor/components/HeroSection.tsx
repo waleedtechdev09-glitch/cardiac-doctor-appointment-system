@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, Stethoscope, ArrowRight, Activity } from "lucide-react";
 import { APP_CONFIG } from "../../constant.js";
+import Link from "next/link.js";
 
 const HeroSection = () => {
   const { name, colors } = APP_CONFIG;
@@ -67,7 +68,9 @@ const HeroSection = () => {
               className={`h-14 w-full sm:w-auto px-10 cursor-pointer ${colors.primary} ${colors.primaryHover} text-white rounded-xl text-md font-bold shadow-[0_20px_40px_rgba(220,38,38,0.2)] transition-all active:scale-95 group flex items-center justify-center gap-3`}
             >
               <Calendar className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-              Book Appointment
+              <Link href="/booking">
+                <span className="text-white">Book Appointment</span>
+              </Link>
             </Button>
 
             <Button
