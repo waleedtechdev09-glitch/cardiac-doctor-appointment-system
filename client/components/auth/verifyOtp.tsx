@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
 import Image from "next/image";
-import { APP_CONFIG } from "../../../constant.js";
+import { APP_CONFIG } from "../../constant.js";
 
 const VerifyOtpForm = () => {
   const { colors, sizing } = APP_CONFIG;

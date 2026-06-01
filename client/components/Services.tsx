@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { ArrowRight } from "lucide-react";
-import { APP_CONFIG } from "../../constant.js";
+import { APP_CONFIG } from "../constant.js";
 import Image from "next/image.js";
 import Link from "next/link.js";
 

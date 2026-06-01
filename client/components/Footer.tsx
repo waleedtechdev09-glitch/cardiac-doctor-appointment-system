@@ -10,7 +10,7 @@ import {
   FaHeart,
 } from "react-icons/fa";
 import { FiArrowUpRight } from "react-icons/fi";
-import { APP_CONFIG } from "../../constant.js";
+import { APP_CONFIG } from "../constant.js";
 
 const Footer = () => {
   const { name } = APP_CONFIG;

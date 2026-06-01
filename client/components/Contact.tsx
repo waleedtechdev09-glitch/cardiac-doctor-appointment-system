@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { APP_CONFIG } from "../../constant.js";
+import { APP_CONFIG } from "../constant.js";
 
 const ContactPage = () => {
   const { name } = APP_CONFIG;

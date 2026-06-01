@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronRight } from "lucide-react";
-import { APP_CONFIG } from "../../constant.js";
+import { APP_CONFIG } from "../constant.js";
 
 const BookingForm = () => {
   const { name } = APP_CONFIG;

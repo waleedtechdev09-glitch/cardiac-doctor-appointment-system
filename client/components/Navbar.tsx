@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation"; // Current page check karne ke liye
 import { Button } from "@/components/ui/button";
 import { HeartPulse, Menu, X, User } from "lucide-react";
-import { APP_CONFIG } from "../../constant.js";
+import { APP_CONFIG } from "../constant.js";
 import Link from "next/link.js";
 
 const Navbar = () => {

@@ -14,7 +14,7 @@ import Image from "next/image";
 import AuthBackButton from "@/components/AuthBackButton";
 
 // Import your constants
-import { APP_CONFIG } from "../../../constant.js";
+import { APP_CONFIG } from "../../constant.js";
 
 const LoginForm = () => {
   const { colors, sizing, name } = APP_CONFIG;

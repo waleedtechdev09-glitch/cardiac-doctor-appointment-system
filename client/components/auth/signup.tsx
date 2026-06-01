@@ -13,7 +13,7 @@ import { HeartPulse } from "lucide-react";
 import AuthBackButton from "@/components/AuthBackButton";
 
 // Import your constants (verify this path is correct for your project)
-import { APP_CONFIG } from "../../../constant.js";
+import { APP_CONFIG } from "../../constant.js";
 import Image from "next/image.js";
 
 const SignupForm = () => {

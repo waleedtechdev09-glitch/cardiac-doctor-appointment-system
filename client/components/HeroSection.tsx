@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, Stethoscope, ArrowRight, Activity } from "lucide-react";
-import { APP_CONFIG } from "../../constant.js";
+import { APP_CONFIG } from "../constant.js";
 import Link from "next/link.js";
 
 const HeroSection = () => {
