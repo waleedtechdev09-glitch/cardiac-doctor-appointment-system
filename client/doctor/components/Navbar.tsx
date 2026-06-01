@@ -59,8 +59,8 @@ const Navbar = () => {
           {[
             { name: "Home", path: "/" },
             { name: "Services", path: "/service" },
-            { name: "About", path: "/#about" },
-            { name: "Contact", path: "/contact" }, // Agar apka contact page alag file ha
+            { name: "About", path: "/about" },
+            { name: "Contact", path: "/contact" },
           ].map((item) => (
             <Link
               key={item.name}
@@ -76,8 +76,10 @@ const Navbar = () => {
         {/* ACTIONS */}
         <div className="hidden md:flex items-center gap-5">
           <Button className="bg-red-600 cursor-pointer hover:bg-red-700 text-white rounded-lg font-bold px-6 h-11 shadow-lg shadow-red-600/20 flex gap-2 active:scale-95 transition-all">
-            <User className="w-4 h-4" />
-            Patient Login
+            <Link href="/login" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Patient Login
+            </Link>
           </Button>
         </div>
 
@@ -96,20 +98,23 @@ const Navbar = () => {
           {[
             { name: "Home", path: "/" },
             { name: "Services", path: "/service" },
-            { name: "About", path: "/#about" },
+            { name: "About", path: "/about" },
             { name: "Contact", path: "/contact" },
           ].map((item) => (
             <Link
               key={item.name}
               href={item.path}
-              className="text-lg font-bold text-slate-900 border-l-4 border-transparent hover:border-red-600 pl-4 transition-all"
+              className="text-[11px] font-medium text-slate-900 border-l-4 border-transparent hover:border-red-600 pl-4 transition-all"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.name}
             </Link>
           ))}
           <Button className="bg-red-600 w-full h-12 rounded-lg font-bold shadow-lg shadow-red-600/20">
-            Patient Login
+            <Link href="/login" className="flex items-center justify-center">
+              <User className="w-4 h-4" />
+              Patient Login
+            </Link>
           </Button>
         </div>
       )}

@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,87 +13,92 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
 import Image from "next/image";
-
-// Import your constants
 import { APP_CONFIG } from "../../../constant.js";
 
 const VerifyOtpForm = () => {
-  const { colors, sizing, name } = APP_CONFIG;
+  const { colors, sizing } = APP_CONFIG;
 
-  // State for 6 digits
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const inputRefs = useRef([]);
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
 
-  const handleChange = (value, index) => {
-    if (isNaN(value)) return;
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleChange = (value: string, index: number) => {
+    if (value !== "" && isNaN(Number(value))) return;
+
     const newOtp = [...otp];
     newOtp[index] = value.substring(value.length - 1);
+
     setOtp(newOtp);
 
-    if (value && index < 5) {
-      inputRefs.current[index + 1].focus();
+    if (value && index < otp.length - 1) {
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
-  const handleKeyDown = (e, index) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1].focus();
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#f8fafc] p-0 md:p-6 lg:p-8">
-      {/* MAIN CONTAINER: Aligned with Login/Signup */}
-      <div className="w-full max-w-300 grid grid-cols-1 md:grid-cols-2 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden md:rounded-3xl min-h-175 border border-slate-100">
-        {/* LEFT SIDE: OTP Form */}
-        <div className="w-full flex flex-col justify-center p-10 md:p-14 lg:p-20">
-          <CardHeader className="p-0 space-y-3 mb-10">
+    <div className="flex min-h-screen w-full items-center justify-center bg-[#f8fafc] p-0 md:p-6 lg:p-8">
+      <div className="grid min-h-[700px] w-full max-w-7xl grid-cols-1 overflow-hidden border border-slate-100 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] md:grid-cols-2 md:rounded-3xl">
+        {/* Left Side */}
+        <div className="flex w-full flex-col justify-center p-10 md:p-14 lg:p-20">
+          <CardHeader className="mb-10 space-y-3 p-0">
             <div
-              className={`w-fit mx-auto md:mx-0 ${colors.iconBg} p-4 rounded-2xl mb-2 group cursor-pointer transition-all duration-300 shadow-sm`}
+              className={`mx-auto mb-2 w-fit rounded-2xl p-4 shadow-sm transition-all duration-300 md:mx-0 ${colors.iconBg}`}
             >
               <ShieldCheck
-                className={`${sizing.iconSize} ${colors.textPrimary} transition-all duration-500 group-hover:fill-current group-hover:scale-110`}
+                className={`${sizing.iconSize} ${colors.textPrimary}`}
               />
             </div>
 
-            <CardTitle className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 text-center md:text-left">
+            <CardTitle className="text-center text-3xl font-black tracking-tight text-slate-900 md:text-left md:text-4xl">
               Verify Identity
             </CardTitle>
-            <CardDescription className="text-slate-500 text-center md:text-left text-base leading-relaxed">
+
+            <CardDescription className="text-center text-base leading-relaxed text-slate-500 md:text-left">
               We've sent a 6-digit medical access code to your{" "}
-              <span className="text-red-600 font-medium italic">
+              <span className="font-medium italic text-red-600">
                 registered email
               </span>
               .
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="p-0 space-y-8">
+          <CardContent className="space-y-8 p-0">
             <div className="space-y-4">
-              <Label className="text-[13px] uppercase tracking-wider font-bold text-slate-500 block text-center md:text-left ml-1">
+              <Label className="ml-1 block text-center text-[13px] font-bold uppercase tracking-wider text-slate-500 md:text-left">
                 Enter 6-Digit Code
               </Label>
 
-              {/* OTP BOXES: Larger and modern */}
-              <div className="flex justify-center md:justify-start gap-2.5 md:gap-3">
+              <div className="flex justify-center gap-2.5 md:justify-start md:gap-3">
                 {otp.map((digit, index) => (
                   <Input
                     key={index}
-                    ref={(el) => (inputRefs.current[index] = el)}
+                    ref={(el) => {
+                      inputRefs.current[index] = el;
+                    }}
                     type="text"
                     maxLength={1}
                     value={digit}
                     onChange={(e) => handleChange(e.target.value, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
-                    className={`w-11 h-14 md:w-14 md:h-16 text-center text-2xl font-black border-2 border-slate-200 focus:border-red-500 focus:ring-red-100 bg-slate-50 rounded-xl transition-all shadow-sm`}
+                    className="h-14 w-11 rounded-xl border-2 border-slate-200 bg-slate-50 text-center text-2xl font-black shadow-sm transition-all focus:border-red-500 focus:ring-red-100 md:h-16 md:w-14"
                     placeholder="-"
                   />
                 ))}
               </div>
 
-              <p className="text-sm text-center md:text-left text-slate-500 pt-2">
+              <p className="pt-2 text-center text-sm text-slate-500 md:text-left">
                 Didn't receive the code?{" "}
                 <button
+                  type="button"
                   className={`${colors.textPrimary} font-bold hover:underline`}
                 >
                   Resend OTP
@@ -101,16 +107,16 @@ const VerifyOtpForm = () => {
             </div>
           </CardContent>
 
-          <CardFooter className="p-0 mt-12 flex flex-col space-y-6">
+          <CardFooter className="mt-12 flex flex-col space-y-6 p-0">
             <Button
-              className={`w-full ${colors.primary} ${colors.primaryHover} ${sizing.inputHeight} text-white cursor-pointer text-md font-medium shadow-lg transition-all active:scale-[0.98] rounded-md`}
+              className={`w-full cursor-pointer rounded-md text-md font-medium text-white shadow-lg transition-all active:scale-[0.98] ${colors.primary} ${colors.primaryHover} ${sizing.inputHeight}`}
             >
               Verify and Access
             </Button>
 
             <a
               href="/login"
-              className="flex items-center justify-center md:justify-start gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors group"
+              className="group flex items-center justify-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 md:justify-start"
             >
               <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
               Back to Secure Login
@@ -118,12 +124,11 @@ const VerifyOtpForm = () => {
           </CardFooter>
         </div>
 
-        {/* RIGHT SIDE: Visual Panel (Consistent with other forms) */}
-        <div className="hidden md:flex relative bg-blue-950 overflow-hidden items-center justify-center p-12">
-          {/* Pulse Glow */}
-          <div className="absolute w-125 h-125 bg-red-600/10 rounded-full blur-[120px] animate-pulse" />
+        {/* Right Side */}
+        <div className="relative hidden items-center justify-center overflow-hidden bg-blue-950 p-12 md:flex">
+          <div className="absolute h-[500px] w-[500px] animate-pulse rounded-full bg-red-600/10 blur-[120px]" />
 
-          <div className="relative w-full h-full max-w-112.5 aspect-square">
+          <div className="relative h-full w-full max-w-[450px] aspect-square">
             <Image
               src="/Cardiologist.png"
               alt="Secure Verification"

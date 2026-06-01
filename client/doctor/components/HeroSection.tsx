@@ -65,7 +65,7 @@ const HeroSection = () => {
           {/* 4. BUTTONS SECTION - Stacked on mobile, side-by-side on desktop */}
           <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 md:gap-6 pt-4">
             <Button
-              className={`h-14 w-full sm:w-auto px-10 cursor-pointer ${colors.primary} ${colors.primaryHover} text-white rounded-xl text-md font-bold shadow-[0_20px_40px_rgba(220,38,38,0.2)] transition-all active:scale-95 group flex items-center justify-center gap-3`}
+              className={`h-14 w-full sm:w-auto px-10 cursor-pointer ${colors.primary} ${colors.primaryHover} text-white rounded-md text-md font-bold shadow-[0_20px_40px_rgba(220,38,38,0.2)] transition-all active:scale-95 group flex items-center justify-center gap-3`}
             >
               <Calendar className="w-5 h-5 group-hover:rotate-12 transition-transform" />
               <Link href="/booking">
@@ -73,23 +73,21 @@ const HeroSection = () => {
               </Link>
             </Button>
 
-            <Button
+            {/* <Button
               variant="outline"
               className="h-14 w-full sm:w-auto px-10 cursor-pointer bg-white/5 border-white/10 text-white hover:bg-white/10 backdrop-blur-md rounded-xl text-md font-bold flex items-center justify-center gap-3 group"
             >
               <Stethoscope className="w-5 h-5 text-red-500" />
               Our Services
               <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all hidden sm:flex" />
-            </Button>
+            </Button> */}
           </div>
 
           {/* Trust Line - More compact on mobile */}
           <div className="flex items-center justify-center md:justify-start gap-6 md:gap-10 pt-8 md:pt-10 border-t border-white/10">
             <div className="space-y-0.5 md:space-y-1">
-              <p className="text-xl md:text-2xl font-black md:text-white text-red-500">
-                5k+
-              </p>
-              <p className="text-[9px] md:text-[10px] uppercase tracking-widest font-bold md:text-slate-500 text-red-500">
+              <p className="text-xl md:text-2xl font-black text-white ">5k+</p>
+              <p className="text-[9px] md:text-[10px] uppercase tracking-widest font-bold md:text-slate-500 text-white">
                 Happy Patients
               </p>
             </div>
@@ -97,11 +95,11 @@ const HeroSection = () => {
             <div className="space-y-0.5 md:space-y-1">
               <div className="flex items-center justify-center md:justify-start gap-2">
                 <Activity className="w-3.5 h-3.5 md:w-4 h-4 text-red-600 animate-pulse" />
-                <p className="text-xl md:text-2xl font-black md:text-white text-red-500">
+                <p className="text-xl md:text-2xl font-black text-white">
                   24/7
                 </p>
               </div>
-              <p className="text-[9px] md:text-[10px] uppercase tracking-widest font-bold md:text-slate-500 text-red-500">
+              <p className="text-[9px] md:text-[10px] uppercase tracking-widest font-bold md:text-slate-500 text-white">
                 Emergency Support
               </p>
             </div>

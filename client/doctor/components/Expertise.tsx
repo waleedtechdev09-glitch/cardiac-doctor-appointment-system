@@ -125,10 +125,10 @@ const Expertise = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-400 group-hover:text-red-600 transition-all cursor-pointer">
+              {/* <div className="flex items-center gap-2 text-xs font-bold text-slate-400 group-hover:text-red-600 transition-all cursor-pointer">
                 <span>View Details</span>
                 <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-              </div>
+              </div> */}
             </div>
           ))}
         </div>

@@ -3,6 +3,7 @@ import React from "react";
 import { ArrowRight } from "lucide-react";
 import { APP_CONFIG } from "../../constant.js";
 import Image from "next/image.js";
+import Link from "next/link.js";
 
 const Services = () => {
   const { colors, name } = APP_CONFIG;
@@ -99,30 +100,69 @@ const Services = () => {
                 </p>
 
                 {/* Smooth Button */}
-                <button className="flex items-center gap-2 text-slate-900 font-bold text-xs uppercase tracking-widest group/btn">
+                {/* <button className="flex items-center gap-2 text-slate-900 font-bold text-xs uppercase tracking-widest group/btn">
                   <span>Explore Service</span>
                   <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                </button>
+                </button> */}
               </div>
             </div>
           ))}
         </div>
 
         {/* Updated CTA Card with rounded-md */}
-        <div className="mt-20 bg-slate-900 rounded-md p-10 md:p-16 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="relative z-10 text-center md:text-left">
-            <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
-              Start Your Cardiac Checkup
-            </h3>
-            <p className="text-slate-400">
-              Reliable diagnosis and care at your fingertips.
-            </p>
+        <div className="relative mt-20 overflow-hidden rounded-md bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-8 py-14 md:px-16 md:py-20">
+          {/* Background Effects */}
+          <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+
+          {/* ECG Line Decoration */}
+          <div className="absolute inset-0 opacity-10">
+            <svg viewBox="0 0 1200 200" className="h-full w-full" fill="none">
+              <path
+                d="M0 100 H250 L300 40 L350 160 L400 70 L450 100 H1200"
+                stroke="white"
+                strokeWidth="4"
+              />
+            </svg>
           </div>
-          <button
-            className={`relative z-10 px-8 py-4 ${colors.primary} ${colors.primaryHover} text-white rounded-md font-bold uppercase tracking-widest text-xs transition-all active:scale-95 whitespace-nowrap`}
-          >
-            Book Now
-          </button>
+
+          <div className="relative z-10 flex flex-col items-center justify-between gap-8 md:flex-row">
+            <div>
+              <span className="mb-4 inline-flex items-center rounded-full bg-white/20 px-4 py-1 text-sm font-medium text-white backdrop-blur">
+                ❤️ Trusted Cardiac Care
+              </span>
+
+              <h3 className="max-w-xl text-3xl font-bold text-white md:text-5xl">
+                Start Your Cardiac Health Journey Today
+              </h3>
+
+              <p className="mt-4 max-w-lg text-white/80">
+                Get expert consultation, advanced diagnostics, and personalized
+                treatment plans from experienced cardiologists.
+              </p>
+            </div>
+
+            <button
+              className="
+        group relative overflow-hidden rounded-md
+        bg-white px-8 py-4 font-bold text-red-600
+        transition-all duration-300 cursor-pointer
+        hover:scale-105 hover:shadow-2xl
+      "
+            >
+              <Link href="/booking">
+                <span className="relative z-10 ">Book Appointment →</span>
+              </Link>
+              <div
+                className="
+          absolute inset-0 -translate-x-full
+          bg-gradient-to-r from-transparent via-white/60 to-transparent
+          transition-transform duration-700
+          group-hover:translate-x-full
+        "
+              />
+            </button>
+          </div>
         </div>
       </div>
     </section>

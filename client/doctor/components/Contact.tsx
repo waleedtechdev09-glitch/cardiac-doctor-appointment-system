@@ -18,7 +18,7 @@ const ContactPage = () => {
   const { name } = APP_CONFIG;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setTimeout(() => setIsSubmitting(false), 2000);

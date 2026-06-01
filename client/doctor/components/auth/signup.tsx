@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { HeartPulse } from "lucide-react";
+import AuthBackButton from "@/components/AuthBackButton";
 
 // Import your constants (verify this path is correct for your project)
 import { APP_CONFIG } from "../../../constant.js";
@@ -19,7 +20,8 @@ const SignupForm = () => {
   const { colors, sizing, name } = APP_CONFIG;
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-0 md:p-6 lg:p-8">
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-slate-50 p-0 md:p-6 lg:p-8">
+      <AuthBackButton />
       {/* MAIN CONTAINER: We switch from a Shadcn <Card> to a custom div to manage the grid/flex layout easily.
         - Default (mobile): Flex column (stacked).
         - md+: Grid with 2 columns.

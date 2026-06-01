@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { HeartPulse, LockKeyhole } from "lucide-react";
 import Image from "next/image";
+import AuthBackButton from "@/components/AuthBackButton";
 
 // Import your constants
 import { APP_CONFIG } from "../../../constant.js";
@@ -19,7 +20,8 @@ const LoginForm = () => {
   const { colors, sizing, name } = APP_CONFIG;
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#f8fafc] p-0 md:p-6 lg:p-8">
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#f8fafc] p-0 md:p-6 lg:p-8">
+      <AuthBackButton />
       {/* MAIN CONTAINER: Split Grid Layout */}
       <div className="w-full max-w-300 grid grid-cols-1 md:grid-cols-2 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden md:rounded-3xl min-h-175 border border-slate-100">
         {/* LEFT SIDE: Login Form */}
@@ -93,7 +95,7 @@ const LoginForm = () => {
             </Button>
 
             <p className="text-sm text-center md:text-left text-slate-500">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <a
                 href="/register"
                 className={`${colors.textPrimary} hover:underline font-bold transition-all`}

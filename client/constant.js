@@ -18,7 +18,7 @@ export const APP_CONFIG = {
   sizing: {
     cardMaxWidth: "max-w-[450px]",
     inputHeight: "h-12",         // Standardized height for inputs/buttons
-    borderRadius: "rounded-xl",
+    borderRadius: "rounded-md",
     iconSize: "h-8 w-8",
   }
 };
