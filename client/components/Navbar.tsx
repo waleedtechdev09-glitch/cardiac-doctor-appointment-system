@@ -1,16 +1,17 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation"; // Current page check karne ke liye
 import { Button } from "@/components/ui/button";
-import { HeartPulse, Menu, X, User } from "lucide-react";
+import { HeartPulse, Menu, User, X } from "lucide-react";
 import { APP_CONFIG } from "../constant.js";
-import Link from "next/link.js";
+import Link from "next/link";
 
 const Navbar = () => {
   const { name } = APP_CONFIG;
   const pathname = usePathname(); // Path check karega (e.g., "/", "/contact")
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Home page check logic
   const isHomePage = pathname === "/";
@@ -19,8 +20,21 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
+    const syncAuthState = () => {
+      setIsAuthenticated(
+        Boolean(window.localStorage.getItem("authToken")) &&
+          Boolean(window.localStorage.getItem("authUser")),
+      );
+    };
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("storage", syncAuthState);
+    syncAuthState();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("storage", syncAuthState);
+    };
   }, []);
 
   // Background color logic
@@ -75,10 +89,10 @@ const Navbar = () => {
 
         {/* ACTIONS */}
         <div className="hidden md:flex items-center gap-5">
-          <Button className="bg-red-600 cursor-pointer hover:bg-red-700 text-white rounded-lg font-bold px-6 h-11 shadow-lg shadow-red-600/20 flex gap-2 active:scale-95 transition-all">
-            <Link href="/login" className="flex items-center gap-2">
+          <Button asChild className="bg-red-600 cursor-pointer hover:bg-red-700 text-white rounded-lg font-bold px-6 h-11 shadow-lg shadow-red-600/20 flex gap-2 active:scale-95 transition-all">
+            <Link href={isAuthenticated ? "/profile" : "/login"} className="flex items-center gap-2">
               <User className="w-4 h-4" />
-              Patient Login
+              {isAuthenticated ? "Profile" : "Patient Login"}
             </Link>
           </Button>
         </div>
@@ -110,10 +124,10 @@ const Navbar = () => {
               {item.name}
             </Link>
           ))}
-          <Button className="bg-red-600 w-full h-12 rounded-lg font-bold shadow-lg shadow-red-600/20">
-            <Link href="/login" className="flex items-center justify-center">
+          <Button asChild className="bg-red-600 w-full h-12 rounded-lg font-bold shadow-lg shadow-red-600/20">
+            <Link href={isAuthenticated ? "/profile" : "/login"} className="flex items-center justify-center gap-2">
               <User className="w-4 h-4" />
-              Patient Login
+              {isAuthenticated ? "Profile" : "Patient Login"}
             </Link>
           </Button>
         </div>

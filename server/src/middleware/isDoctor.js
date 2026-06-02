@@ -1,5 +1,12 @@
 const isDoctor = (req, res, next) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
     if (req.user.role !== "doctor") {
       return res.status(403).json({
         success: false,
@@ -7,8 +14,7 @@ const isDoctor = (req, res, next) => {
       });
     }
 
-    next();
-    
+    // next();
   } catch (error) {
     return res.status(500).json({
       success: false,

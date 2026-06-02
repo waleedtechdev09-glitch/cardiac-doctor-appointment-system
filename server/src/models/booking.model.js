@@ -23,6 +23,7 @@ const bookingSchema = new mongoose.Schema(
       default: "pending",
     },
     isEmergency: { type: Boolean, default: false },
+    reminderSent: { type: Boolean, default: false },
     symptoms: { type: String },
     vitals: {
       bloodPressure: { type: String },

@@ -1,4 +1,12 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { HeartPulse, LoaderCircle, LockKeyhole } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+
 import { Button } from "@/components/ui/button";
 import {
   CardContent,
@@ -9,110 +17,177 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { HeartPulse, LockKeyhole } from "lucide-react";
-import Image from "next/image";
 import AuthBackButton from "@/components/AuthBackButton";
-
-// Import your constants
+import { authApi } from "@/lib/auth";
 import { APP_CONFIG } from "../../constant.js";
 
 const LoginForm = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { colors, sizing, name } = APP_CONFIG;
 
+  const [form, setForm] = useState({
+    email: searchParams.get("email") ?? "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (field: keyof typeof form) => (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setForm((current) => ({
+      ...current,
+      [field]: event.target.value,
+    }));
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+
+    const email = form.email.trim();
+    const password = form.password.trim();
+
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading("Verifying credentials...");
+
+    try {
+      const response = await authApi.login({
+        email,
+        password,
+      });
+
+      window.localStorage.setItem("pendingOtpEmail", email);
+      toast.update(loadingToastId, {
+        render: response.message || "OTP sent successfully. Please verify to continue.",
+        type: "success",
+        isLoading: false,
+        autoClose: 1800,
+        closeOnClick: true,
+        pauseOnHover: false,
+      });
+
+      window.setTimeout(() => {
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+      }, 1800);
+    } catch (submissionError) {
+      toast.update(loadingToastId, {
+        render:
+          submissionError instanceof Error
+            ? submissionError.message
+            : "Login failed",
+        type: "error",
+        isLoading: false,
+        autoClose: 2500,
+        closeOnClick: true,
+        pauseOnHover: false,
+      });
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Login failed",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#f8fafc] p-0 md:p-6 lg:p-8">
+    <div className="relative flex min-h-screen w-full items-center justify-center bg-[#f8fafc] p-0 md:p-6 lg:p-8">
       <AuthBackButton />
-      {/* MAIN CONTAINER: Split Grid Layout */}
-      <div className="w-full max-w-300 grid grid-cols-1 md:grid-cols-2 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden md:rounded-3xl min-h-175 border border-slate-100">
-        {/* LEFT SIDE: Login Form */}
-        <div className="w-full flex flex-col justify-center p-10 md:p-14 lg:p-20">
-          <CardHeader className="p-0 space-y-3 mb-10">
-            {/* Animated Icon */}
+      <ToastContainer position="top-right" theme="colored" />
+
+      <div className="grid min-h-[720px] w-full max-w-[1200px] grid-cols-1 overflow-hidden border border-slate-100 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] md:grid-cols-2 md:rounded-3xl">
+        <form className="flex w-full flex-col justify-center p-10 md:p-14 lg:p-20" onSubmit={handleSubmit}>
+          <CardHeader className="mb-10 space-y-3 p-0">
             <div
-              className={`w-fit mx-auto md:mx-0 ${colors.iconBg} p-4 rounded-full mb-2 group cursor-pointer transition-all duration-300 shadow-sm`}
+              className={`mx-auto mb-2 w-fit rounded-full p-4 shadow-sm transition-all duration-300 md:mx-0 ${colors.iconBg}`}
             >
-              <HeartPulse
-                className={`${sizing.iconSize} ${colors.textPrimary} transition-all duration-500 group-hover:fill-current group-hover:scale-110`}
-              />
+              <HeartPulse className={`${sizing.iconSize} ${colors.textPrimary}`} />
             </div>
 
-            <CardTitle className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 text-center md:text-left">
+            <CardTitle className="text-center text-3xl font-black tracking-tight text-slate-900 md:text-left md:text-4xl">
               Welcome Back
             </CardTitle>
-            <CardDescription className="text-slate-500 text-center md:text-left text-base leading-relaxed">
-              Log in to your{" "}
-              <span className="text-red-600 font-medium">{name}</span>{" "}
-              professional portal.
+            <CardDescription className="text-center text-base leading-relaxed text-slate-500 md:text-left">
+              Log in to your <span className="font-medium text-red-600">{name}</span> professional portal.
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="p-0 space-y-6">
+          <CardContent className="space-y-6 p-0">
             <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="text-[13px] uppercase tracking-wider font-bold text-slate-500 ml-1"
+                className="ml-1 text-[13px] font-bold uppercase tracking-wider text-slate-500"
               >
                 Medical Email
               </Label>
               <Input
                 id="email"
                 type="email"
-                className={`w-full ${sizing.inputHeight} border-slate-200 focus:border-red-500 focus:ring-red-100 bg-slate-50/50 rounded-xl transition-all`}
+                value={form.email}
+                onChange={handleChange("email")}
+                className={`w-full ${sizing.inputHeight} rounded-xl border-slate-200 bg-slate-50/50 transition-all focus:border-red-500 focus:ring-red-100`}
                 placeholder="doctor.smith@cardio-care.com"
               />
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between ml-1">
+              <div className="ml-1 flex items-center justify-between">
                 <Label
                   htmlFor="password"
-                  className="text-[13px] uppercase tracking-wider font-bold text-slate-500"
+                  className="text-[13px] font-bold uppercase tracking-wider text-slate-500"
                 >
                   Password
                 </Label>
-                <a
-                  href="#"
-                  className={`text-xs ${colors.textPrimary} hover:underline font-semibold`}
-                >
+                <Link href="#" className={`text-xs ${colors.textPrimary} font-semibold hover:underline`}>
                   Forgot Password?
-                </a>
+                </Link>
               </div>
               <Input
                 id="password"
                 type="password"
-                className={`w-full ${sizing.inputHeight} border-slate-200 focus:border-red-500 focus:ring-red-100 bg-slate-50/50 rounded-xl transition-all`}
-                placeholder="••••••••••"
+                value={form.password}
+                onChange={handleChange("password")}
+                className={`w-full ${sizing.inputHeight} rounded-xl border-slate-200 bg-slate-50/50 transition-all focus:border-red-500 focus:ring-red-100`}
+                placeholder="Enter password"
               />
             </div>
+
+            {error ? <p className="text-sm text-red-600">{error}</p> : null}
           </CardContent>
 
-          <CardFooter className="p-0 mt-12 flex flex-col space-y-6">
+          <CardFooter className="mt-12 flex flex-col space-y-6 p-0">
             <Button
-              className={`w-full ${colors.primary} ${colors.primaryHover} ${sizing.inputHeight} text-white cursor-pointer text-md font-medium shadow-[0_10px_20px_rgba(220,38,38,0.2)] transition-all active:scale-[0.98] rounded-md flex gap-3`}
+              type="submit"
+              disabled={isSubmitting}
+              className={`flex w-full gap-3 rounded-md text-base font-medium text-white shadow-[0_10px_20px_rgba(220,38,38,0.2)] transition-all active:scale-[0.98] ${colors.primary} ${colors.primaryHover} ${sizing.inputHeight}`}
             >
-              <LockKeyhole className="w-5 h-5" />
-              Secure Login
+              {isSubmitting ? (
+                <LoaderCircle className="h-5 w-5 animate-spin" />
+              ) : (
+                <LockKeyhole className="h-5 w-5" />
+              )}
+              {isSubmitting ? "Sending code..." : "Secure Login"}
             </Button>
 
-            <p className="text-sm text-center md:text-left text-slate-500">
+            <p className="text-center text-sm text-slate-500 md:text-left">
               Don&apos;t have an account?{" "}
-              <a
-                href="/register"
-                className={`${colors.textPrimary} hover:underline font-bold transition-all`}
-              >
+              <Link href="/register" className={`${colors.textPrimary} font-bold transition-all hover:underline`}>
                 Register for {name}
-              </a>
+              </Link>
             </p>
           </CardFooter>
-        </div>
+        </form>
 
-        {/* RIGHT SIDE: Visual Panel (Matches Signup) */}
-        <div className="hidden md:flex relative bg-blue-950 overflow-hidden items-center justify-center p-12">
-          {/* Medical Glow Effect */}
-          <div className="absolute w-125 h-125 bg-red-600/10 rounded-full blur-[120px] animate-pulse" />
-
-          <div className="relative w-full h-full max-w-112.5 aspect-square">
-            {/* Using the same Cardiologist image for consistency */}
+        <div className="relative hidden items-center justify-center overflow-hidden bg-blue-950 p-12 md:flex">
+          <div className="relative aspect-square h-[450px] w-[450px]">
             <Image
               src="/Cardiologist.png"
               alt="Secure Cardiovascular Access"

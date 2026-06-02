@@ -101,7 +101,7 @@ const BookingSuccessPage = () => {
                     Email Confirmation
                   </h4>
                   <p className="mt-1 text-sm text-slate-500">
-                    You'll receive an email containing your appointment status
+                    You&apos;ll receive an email containing your appointment status
                     and complete details.
                   </p>
                 </div>
@@ -151,7 +151,7 @@ const BookingSuccessPage = () => {
         <div className="mt-10 flex items-center justify-center gap-2">
           <div className="h-2 w-2 animate-pulse rounded-full bg-red-600" />
           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
-            {name} • Secure Cardiac Care • 2026
+            {name} | Secure Cardiac Care | 2026
           </p>
         </div>
       </div>

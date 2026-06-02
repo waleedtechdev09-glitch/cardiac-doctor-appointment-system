@@ -51,6 +51,7 @@ export const sendOTPEmail = async (email, otp) => {
     console.log("OTP sent");
   } catch (err) {
     console.log("OTP error:", err.message);
+    throw err;
   }
 };
 

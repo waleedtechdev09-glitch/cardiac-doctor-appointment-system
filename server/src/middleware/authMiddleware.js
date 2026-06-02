@@ -1,8 +1,7 @@
 import jwt from "jsonwebtoken";
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = (req, res,next) => {
   try {
-    // 1. token get karo header se
     const token = req.headers.authorization;
 
     if (!token) {
@@ -11,16 +10,11 @@ const authMiddleware = (req, res, next) => {
       });
     }
 
-    // 2. token format: "Bearer token"
     const actualToken = token.split(" ")[1];
-
-    // 3. verify token
     const decoded = jwt.verify(actualToken, process.env.JWT_SECRET);
 
-    // 4. user ko request me attach karo
     req.user = decoded;
-    next();
-
+    // next();
   } catch (error) {
     return res.status(401).json({
       message: "Invalid token",
