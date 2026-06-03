@@ -12,9 +12,9 @@ const bookingSchema = new mongoose.Schema(
     patientAge: { type: Number, required: true },
     patientGender: { type: String, enum: ["Male", "Female", "Other"] },
     riskScore: {
-  type: Number,
-  default: 0
-},
+      type: Number,
+      default: 0,
+    },
     date: { type: String, required: true }, // "2026-04-21"
     time: { type: String, required: true }, // "09:00 - 09:30"
     status: {
@@ -22,6 +22,10 @@ const bookingSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "cancelled", "completed"],
       default: "pending",
     },
+    doctorArchived: { type: Boolean, default: false },
+    decisionReason: { type: String, default: "" },
+    decisionAt: { type: Date, default: null },
+    decisionBy: { type: String, default: "" },
     isEmergency: { type: Boolean, default: false },
     reminderSent: { type: Boolean, default: false },
     symptoms: { type: String },

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ const VerifyOtpForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { colors, sizing } = APP_CONFIG;
+  const loginRole = searchParams.get("role") === "doctor" ? "doctor" : "user";
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const email = searchParams.get("email") ?? "";
@@ -83,6 +85,7 @@ const VerifyOtpForm = () => {
     }
 
     setIsSubmitting(true);
+    const loadingToastId = toast.loading("Verifying your code...");
 
     try {
       const response = await authApi.verifyOtp({
@@ -93,8 +96,34 @@ const VerifyOtpForm = () => {
       window.localStorage.setItem("authToken", response.token);
       window.localStorage.setItem("authUser", JSON.stringify(response.user));
       window.localStorage.removeItem("pendingOtpEmail");
-      router.push("/");
+      window.localStorage.removeItem("pendingAuthRole");
+      window.dispatchEvent(new Event("storage"));
+
+      toast.update(loadingToastId, {
+        render: response.message || "Login successful.",
+        type: "success",
+        isLoading: false,
+        autoClose: 2800,
+        closeOnClick: true,
+        pauseOnHover: false,
+      });
+
+      window.setTimeout(() => {
+        router.push(response.user?.role === "doctor" || loginRole === "doctor" ? "/doctor/dashboard" : "/");
+      }, 3000);
     } catch (submissionError) {
+      toast.update(loadingToastId, {
+        render:
+          submissionError instanceof Error
+            ? submissionError.message
+            : "OTP verification failed",
+        type: "error",
+        isLoading: false,
+        autoClose: 2500,
+        closeOnClick: true,
+        pauseOnHover: false,
+      });
+
       setError(
         submissionError instanceof Error
           ? submissionError.message
@@ -107,6 +136,7 @@ const VerifyOtpForm = () => {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#f8fafc] p-0 md:p-6 lg:p-8">
+      <ToastContainer position="top-right" theme="colored" />
       <div className="grid min-h-[720px] w-full max-w-[1200px] grid-cols-1 overflow-hidden border border-slate-100 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] md:grid-cols-2 md:rounded-3xl">
         <form className="flex w-full flex-col justify-center p-10 md:p-14 lg:p-20" onSubmit={handleSubmit}>
           <CardHeader className="mb-10 space-y-3 p-0">
@@ -162,7 +192,11 @@ const VerifyOtpForm = () => {
                   className={`${colors.textPrimary} font-bold hover:underline`}
                   onClick={() =>
                     router.push(
-                      email ? `/login?email=${encodeURIComponent(email)}` : "/login",
+                      email
+                        ? `/login?email=${encodeURIComponent(email)}${loginRole === "doctor" ? "&role=doctor" : ""}`
+                        : loginRole === "doctor"
+                          ? "/login?role=doctor"
+                          : "/login",
                     )
                   }
                 >
@@ -184,11 +218,11 @@ const VerifyOtpForm = () => {
             </Button>
 
             <Link
-              href="/login"
+              href={loginRole === "doctor" ? "/login?role=doctor" : "/login"}
               className="group flex items-center justify-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 md:justify-start"
              >
                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-               Back to Secure Login
+               Back to {loginRole === "doctor" ? "Doctor Login" : "Secure Login"}
              </Link>
           </CardFooter>
         </form>

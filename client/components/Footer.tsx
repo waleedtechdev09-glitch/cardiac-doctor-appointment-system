@@ -115,7 +115,7 @@ const Footer = () => {
             © {currentYear} {name}. All rights reserved. Designed with
             <FaHeart className="mx-1 inline text-red-600" />
             by
-            <span className="ml-1 text-slate-300">Mudassar & Team</span>
+            <span className="ml-1 text-slate-300">Waleed Ahmad</span>
           </p>
 
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
@@ -126,9 +126,13 @@ const Footer = () => {
               </span>
             </div>
 
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-              v1.0.4 — Production
-            </p>
+            <a
+              href="/doctor/login"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 transition-colors hover:text-red-600"
+              aria-label="Doctor Access"
+            >
+              Doctor Access
+            </a>
           </div>
         </div>
       </div>

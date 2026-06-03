@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -14,14 +13,28 @@ import { authApi } from "@/lib/auth";
 import { APP_CONFIG } from "../../constant.js";
 import Image from "next/image.js";
 
-const PatientLoginForm = () => {
+const DoctorLoginForm = () => {
   const router = useRouter();
-  const { colors, sizing, name } = APP_CONFIG;
+  const { colors, sizing } = APP_CONFIG;
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const token = window.localStorage.getItem("authToken");
+    const storedUser = window.localStorage.getItem("authUser");
+
+    if (token && storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        if (user.role === "doctor") {
+          router.replace("/doctor/dashboard");
+        }
+      } catch {}
+    }
+  }, [router]);
 
   const handleChange = (field: keyof typeof form) => (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -45,10 +58,10 @@ const PatientLoginForm = () => {
     const loadingToastId = toast.loading("Verifying credentials...");
 
     try {
-      const response = await authApi.login({ email, password });
+      const response = await authApi.loginDoctor({ email, password });
 
       window.localStorage.setItem("pendingOtpEmail", email);
-      window.localStorage.setItem("pendingAuthRole", "user");
+      window.localStorage.setItem("pendingAuthRole", "doctor");
       toast.update(loadingToastId, {
         render: response.message || "OTP sent successfully. Please verify to continue.",
         type: "success",
@@ -59,7 +72,7 @@ const PatientLoginForm = () => {
       });
 
       setTimeout(() => {
-        router.push(`/verify-otp?email=${encodeURIComponent(email)}&role=user`);
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}&role=doctor`);
       }, 1800);
     } catch (submissionError) {
       toast.update(loadingToastId, {
@@ -89,17 +102,17 @@ const PatientLoginForm = () => {
             </div>
 
             <h2 className="text-center text-3xl font-black tracking-tight text-slate-900 md:text-left md:text-4xl">
-              Welcome Back
+              Doctor Login
             </h2>
             <p className="text-center text-base leading-relaxed text-slate-500 md:text-left">
-              Log in to your <span className="font-medium text-red-600">{name}</span> professional portal.
+              Log in to your doctor dashboard and manage appointment requests.
             </p>
           </div>
 
           <div className="space-y-6 p-0">
             <div className="space-y-2">
               <Label htmlFor="email" className="ml-1 text-[13px] font-bold uppercase tracking-wider text-slate-500">
-                Medical Email
+                Doctor Email
               </Label>
               <Input
                 id="email"
@@ -146,13 +159,6 @@ const PatientLoginForm = () => {
             >
               {isSubmitting ? "Sending code..." : "Secure Login"}
             </Button>
-
-            <p className="text-center text-sm text-slate-500 md:text-left">
-              Don&apos;t have an account?{" "}
-              <Link href="/register" className={`${colors.textPrimary} font-bold transition-all hover:underline`}>
-                Register for {name}
-              </Link>
-            </p>
           </div>
         </form>
 
@@ -168,4 +174,4 @@ const PatientLoginForm = () => {
   );
 };
 
-export default PatientLoginForm;
+export default DoctorLoginForm;

@@ -14,7 +14,8 @@ cron.schedule("* * * * *", async () => {
     // - Jinka reminder abhi tak NAHI gaya (reminderSent: false)
     const bookings = await Booking.find({ 
       status: "confirmed", 
-      reminderSent: false 
+      reminderSent: false,
+      doctorArchived: { $ne: true }
     });
 
     for (let booking of bookings) {

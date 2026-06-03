@@ -27,12 +27,19 @@ export const authApi = {
     email: string;
     password: string;
   }) => requestAuth<{ message: string }>(`/register`, payload),
+  registerDoctor: (payload: {
+    username: string;
+    email: string;
+    password: string;
+  }) => requestAuth<{ message: string }>(`/doctor/register`, payload),
   login: (payload: { email: string; password: string }) =>
     requestAuth<{ message: string }>(`/login`, payload),
+  loginDoctor: (payload: { email: string; password: string }) =>
+    requestAuth<{ message: string }>(`/doctor/login`, payload),
   verifyOtp: (payload: { email: string; otp: string }) =>
     requestAuth<{
       message: string;
       token: string;
-      user: { id: string; username: string; email: string };
+      user: { id: string; username: string; email: string; role: string };
     }>(`/verify-otp`, payload),
 };

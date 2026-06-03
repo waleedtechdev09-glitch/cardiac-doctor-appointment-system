@@ -8,6 +8,7 @@ import authRoutes from "./src/routes/auth.route.js";
 import userRoutes from "./src/routes/user.route.js";
 import bookingRoutes from "./src/routes/booking.route.js";
 import "./src/utils/reminderCron.js";
+import { ensureDoctorAccount } from "./src/utils/seedDoctor.js";
 
 dotenv.config();
 
@@ -19,7 +20,14 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // DB connection
-connectDB();
+const startServer = async () => {
+  await connectDB();
+  await ensureDoctorAccount();
+
+  app.listen(process.env.PORT, () => {
+    console.log(`Server is running on port ${process.env.PORT}`);
+  });
+};
 
 // routes
 app.use("/api/auth", authRoutes);
@@ -27,7 +35,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/booking", bookingRoutes);
 
 // server start
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
+startServer().catch((error) => {
+  console.log("Server start error:", error.message);
 });
 

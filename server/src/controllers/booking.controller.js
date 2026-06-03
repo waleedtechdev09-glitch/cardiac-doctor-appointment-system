@@ -10,6 +10,52 @@ import {
 import PDFDocument from "pdfkit";
 import { calculateRiskScore } from "../utils/riskCalculator.js";
 
+const formatTo24Hour = (timeValue) => {
+  if (!timeValue) return null;
+
+  const normalizedValue = timeValue.trim();
+  const [timePart, meridiem] = normalizedValue.split(/\s+/);
+  const [hourPart, minutePart] = timePart.split(":");
+  const hour = Number(hourPart);
+  const minute = Number(minutePart);
+
+  if (Number.isNaN(hour) || Number.isNaN(minute)) {
+    return null;
+  }
+
+  let normalizedHour = hour;
+
+  if (meridiem) {
+    const normalizedMeridiem = meridiem.toUpperCase();
+
+    if (normalizedMeridiem === "PM" && normalizedHour !== 12) {
+      normalizedHour += 12;
+    }
+
+    if (normalizedMeridiem === "AM" && normalizedHour === 12) {
+      normalizedHour = 0;
+    }
+  } else if (normalizedHour >= 1 && normalizedHour <= 8) {
+    normalizedHour += 12;
+  }
+
+  return `${String(normalizedHour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+};
+
+const normalizeTimeRange = (timeRange) => {
+  if (!timeRange) return null;
+
+  const [rawStart, rawEnd] = timeRange.split(" - ").map((part) => part.trim());
+  if (!rawStart || !rawEnd) return null;
+
+  const startTime = formatTo24Hour(rawStart);
+  const endTime = formatTo24Hour(rawEnd);
+
+  if (!startTime || !endTime) return null;
+
+  return `${startTime} - ${endTime}`;
+};
+
 // ====================== CREATE BOOKING ======================
 
 export const createBooking = async (req, res) => {
@@ -20,149 +66,180 @@ export const createBooking = async (req, res) => {
       symptoms, bloodPressure, isEmergency 
     } = req.body;
 
-    // 1. --- DATE & TIME INITIALIZATION ---
     const now = new Date();
-    const todayStr = now.toLocaleDateString('en-CA'); 
+    const todayStr = now.toLocaleDateString("en-CA");
     const selectedDateStr = date;
 
-    // 2. --- PAST DATE VALIDATION ---
+    if (!date || !time || !patientName || !patientAge || !patientGender) {
+      return res.status(400).json({
+        success: false,
+        message: "Please fill in all required booking details.",
+      });
+    }
+
     if (selectedDateStr < todayStr) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Pichli tareekh select nahi ki ja sakti." 
+      return res.status(400).json({
+        success: false,
+        message: "You cannot select a past date.",
       });
     }
 
-    // 3. --- TIME NORMALIZATION (String ko 24-hour mein convert karna) ---
-    const timeParts = time.split(' - ');
-    const startTime = timeParts[0];
-    const endTime = timeParts[1];
+    const normalizedTime = normalizeTimeRange(time);
+    if (!normalizedTime) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid time slot format.",
+      });
+    }
 
-    const convertTo24 = (timeStr) => {
-      let [hour, minute] = timeStr.split(':').map(Number);
-      // Agar hour 1 se 8 ke darmiyan hai, toh usey 13-20 (PM) bana dein
-      if (hour >= 1 && hour <= 8) hour += 12;
-      return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-    };
+    const normalizedStartHour = parseInt(normalizedTime.split(":")[0], 10);
 
-    // normalizedTime ban jayega "14:30 - 15:00" agar user ne "02:30 - 03:00" bheja
-    const normalizedTime = `${convertTo24(startTime)} - ${convertTo24(endTime)}`;
-    const normalizedStartHour = parseInt(normalizedTime.split(':')[0]);
-
-    // 4. --- LUNCH / NAMAZ BREAK CHECK (01:00 PM = 13:00) ---
     if (normalizedStartHour === 13) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "01:00 PM se 02:00 PM tak Lunch aur Namaz ka break hota hai." 
+      return res.status(400).json({
+        success: false,
+        message: "The clinic is closed for lunch and prayer from 1:00 PM to 2:00 PM.",
       });
     }
 
-    // 5. --- SAME DAY EXPIRED SLOT CHECK ---
     if (selectedDateStr === todayStr) {
       const [sHour, sMinute] = normalizedTime.split(' - ')[0].split(':').map(Number);
       const slotTime = new Date();
       slotTime.setHours(sHour, sMinute, 0, 0);
 
       if (slotTime < now) {
-        return res.status(400).json({ 
-          success: false, 
-          message: `Ye waqt (${time}) guzar chuka hai.` 
+        return res.status(400).json({
+          success: false,
+          message: `The selected time (${time}) has already passed.`,
         });
       }
     }
 
-    // 6. --- CLINIC HOLIDAY CHECK (SUNDAY) ---
     const dayOfWeek = new Date(date).getDay();
     if (dayOfWeek === 0) {
-      return res.status(400).json({ success: false, message: "Sunday ko clinic band hota hai." });
-    }
-
-    // 7. --- SLOT VALIDITY & DUPLICATE CHECK ---
-    const allSlots = generateSlots();
-    
-    // Ab hum normalizedTime check karenge jo generator ki array se match karega
-    if (!allSlots.includes(normalizedTime)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Ghalat time slot! Available slots: 09:00 to 13:00 aur 14:00 to 21:00." 
+      return res.status(400).json({
+        success: false,
+        message: "The clinic is closed on Sundays.",
       });
     }
 
-   const existing = await Booking.findOne({ 
-  date, 
-  time: normalizedTime, 
-  status: { $in: ["pending", "confirmed"] } // Sirf in statuses ko block karein
-});
+    const allSlots = generateSlots();
 
-if (existing) {
-  return res.status(400).json({ success: false, message: "Ye slot pehle se book hai." });
-}
+    if (!allSlots.includes(normalizedTime)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid time slot. Available slots are 9:00 AM to 1:00 PM and 2:00 PM to 9:00 PM.",
+      });
+    }
 
-    // 8. --- RISK SCORE CALCULATION ---
+    const existing = await Booking.findOne({
+      date,
+      time: normalizedTime,
+      status: { $in: ["pending", "confirmed"] },
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: "This slot is already booked.",
+      });
+    }
+
     const riskScore = calculateRiskScore(patientAge, bloodPressure, symptoms);
 
-    // 9. --- DATABASE ENTRY ---
     const booking = await Booking.create({
       user: userId,
       date,
-      time: normalizedTime, // Save as 24h format for consistency
+      time: normalizedTime,
       patientName,
       patientAge,
       patientGender,
       symptoms,
       riskScore,
-      isEmergency: riskScore >= 8 ? true : (isEmergency || false), 
+      isEmergency: riskScore >= 8 ? true : (isEmergency || false),
       vitals: { bloodPressure },
       status: "pending",
+      doctorArchived: false,
     });
 
-    // 10. --- NOTIFY DOCTOR ---
     await sendDoctorNotification(booking);
 
-    res.status(201).json({ 
-      success: true, 
-      message: "Appointment request bhej di gayi hai.", 
-      booking 
+    res.status(201).json({
+      success: true,
+      message: "Your appointment request has been submitted successfully.",
+      booking,
     });
-
   } catch (error) {
     console.error("Booking Controller Error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to create booking.",
+    });
   }
 };
 // ====================== APPROVE BOOKING ======================
 export const approveBooking = async (req, res) => {
   try {
+    const { reason = "" } = req.body;
     const booking = await Booking.findById(req.params.id).populate("user");
-    if (!booking) return res.status(404).json({ success: false, message: "Not found" });
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
 
     booking.status = "confirmed";
+    booking.decisionReason = reason?.trim() || "Your request has been accepted.";
+    booking.decisionAt = new Date();
+    booking.decisionBy = req.user?.email || req.user?.username || "doctor";
+    booking.doctorArchived = false;
     await booking.save();
 
     if (booking.user?.email) {
-      await sendBookingConfirmationEmail(booking.user.email, booking);
+      await sendBookingConfirmationEmail(
+        booking.user.email,
+        booking,
+        booking.decisionReason,
+      );
     }
-    res.json({ success: true, message: "Approved" });
+    res.json({ success: true, message: "Booking approved successfully." });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message || "Failed to approve booking.",
+    });
   }
 };
 
 // ====================== REJECT BOOKING ======================
 export const rejectBooking = async (req, res) => {
   try {
+    const { reason = "" } = req.body;
     const booking = await Booking.findById(req.params.id).populate("user");
-    if (!booking) return res.status(404).json({ success: false, message: "Not found" });
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
 
     booking.status = "cancelled";
+    booking.decisionReason = reason?.trim() || "Your request has been rejected.";
+    booking.decisionAt = new Date();
+    booking.decisionBy = req.user?.email || req.user?.username || "doctor";
+    booking.doctorArchived = false;
     await booking.save();
 
     if (booking.user?.email) {
-      await sendRejectionEmail(booking.user.email, booking);
+      await sendRejectionEmail(booking.user.email, booking, booking.decisionReason);
     }
-    res.json({ success: true, message: "Rejected" });
+    res.json({ success: true, message: "Booking rejected successfully." });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message || "Failed to reject booking.",
+    });
   }
 };
 
@@ -170,14 +247,72 @@ export const rejectBooking = async (req, res) => {
 export const getAllBookingsForDoctor = async (req, res) => {
   try {
     const { status, date } = req.query;
-    let filter = {};
+    let filter = { doctorArchived: { $ne: true } };
     if (status) filter.status = status;
     if (date) filter.date = date;
 
-    const bookings = await Booking.find(filter).populate("user", "name email").sort({ createdAt: -1 });
+    const bookings = await Booking.find(filter)
+      .populate("user", "username email")
+      .sort({ createdAt: -1 });
     res.json({ success: true, count: bookings.length, bookings });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ====================== GET BOOKINGS FOR PATIENT ======================
+export const getMyBookings = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const bookings = await Booking.find({ user: userId })
+      .sort({ createdAt: -1 })
+      .select("date time status createdAt updatedAt patientName prescription");
+
+    res.json({
+      success: true,
+      count: bookings.length,
+      bookings,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch bookings.",
+    });
+  }
+};
+
+// ====================== ARCHIVE BOOKING FOR DOCTOR ======================
+export const archiveBookingForDoctor = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    if (booking.status === "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Please accept or reject the request before deleting it.",
+      });
+    }
+
+    booking.doctorArchived = true;
+    await booking.save();
+
+    res.json({
+      success: true,
+      message: "Booking removed from doctor dashboard.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to archive booking.",
+    });
   }
 };
 
@@ -187,10 +322,44 @@ export const addPrescription = async (req, res) => {
     const { bookingId, medicines, doctorNotes } = req.body;
 
     const booking = await Booking.findById(bookingId).populate("user");
-    if (!booking) return res.status(404).json({ message: "Booking not found" });
+    if (!booking) return res.status(404).json({ message: "Booking not found." });
+
+    if (booking.status !== "confirmed" && booking.status !== "completed") {
+      return res.status(400).json({
+        success: false,
+        message: "Only confirmed requests can be marked as checkup complete.",
+      });
+    }
+
+    const normalizedMedicines = Array.isArray(medicines)
+      ? medicines
+          .map((medicine) => ({
+            name: String(medicine?.name ?? "").trim(),
+            dosage: String(medicine?.dosage ?? "").trim(),
+            timing: String(medicine?.timing ?? "").trim(),
+            duration: String(medicine?.duration ?? "").trim(),
+          }))
+          .filter(
+            (medicine) =>
+              medicine.name || medicine.dosage || medicine.timing || medicine.duration,
+          )
+      : [];
+
+    if (!normalizedMedicines.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Please add at least one medicine.",
+      });
+    }
+
+    const cleanDoctorNotes = String(doctorNotes ?? "").trim();
 
     // Database Update
-    booking.prescription = { medicines, doctorNotes, prescribedAt: new Date() };
+    booking.prescription = {
+      medicines: normalizedMedicines,
+      doctorNotes: cleanDoctorNotes,
+      prescribedAt: new Date(),
+    };
     booking.status = "completed"; 
     await booking.save();
 
@@ -229,7 +398,7 @@ export const addPrescription = async (req, res) => {
 
     // Medicines List
     let yPos = 310;
-    medicines.forEach((med, i) => {
+    normalizedMedicines.forEach((med, i) => {
       doc.fillColor('#000000').fontSize(12).font('Helvetica-Bold').text(`${i + 1}. ${med.name}`, 70, yPos);
       doc.fontSize(10).font('Helvetica').fillColor('#4b5563').text(`   Dosage: ${med.dosage} | Timing: ${med.timing} | Duration: ${med.duration}`, 70, yPos + 15);
       yPos += 45;
@@ -239,7 +408,7 @@ export const addPrescription = async (req, res) => {
     doc.moveDown(2);
     doc.rect(50, yPos + 10, 510, 70).fill('#f1f5f9'); 
     doc.fillColor('#1a365d').fontSize(11).font('Helvetica-Bold').text("Doctor's Advice:", 60, yPos + 20);
-    doc.fillColor('#475569').fontSize(10).font('Helvetica').text(doctorNotes, 60, yPos + 35, { width: 480 });
+    doc.fillColor('#475569').fontSize(10).font('Helvetica').text(cleanDoctorNotes || "No additional notes.", 60, yPos + 35, { width: 480 });
 
     // Footer
     doc.rect(0, 780, 612, 15).fill('#1a365d'); 
@@ -248,6 +417,6 @@ export const addPrescription = async (req, res) => {
     doc.end();
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message || "Failed to add prescription." });
   }
 };

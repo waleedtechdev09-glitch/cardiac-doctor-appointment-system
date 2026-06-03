@@ -18,8 +18,7 @@ const issueOtp = async (user) => {
   await sendOTPEmail(user.email, otp);
 };
 
-// ====================== SIGNUP ======================
-export const signup = async (req, res) => {
+const registerAccount = async (req, res, role) => {
   try {
     const { username, email, password } = req.body;
     const cleanUsername = username?.trim();
@@ -47,20 +46,32 @@ export const signup = async (req, res) => {
       username: cleanUsername,
       email: cleanEmail,
       password: hashedPassword,
+      role,
     });
 
     res.status(201).json({
-      message: "User registered successfully.",
+      message:
+        role === "doctor"
+          ? "Doctor account registered successfully."
+          : "User registered successfully.",
       user: {
         id: newUser._id,
         username: newUser.username,
         email: newUser.email,
+        role: newUser.role,
       },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+// ====================== SIGNUP ======================
+export const signup = async (req, res) => registerAccount(req, res, "user");
+
+// ====================== DOCTOR SIGNUP ======================
+export const signupDoctor = async (req, res) =>
+  registerAccount(req, res, "doctor");
 
 // ====================== LOGIN ======================
 export const login = async (req, res) => {
@@ -75,6 +86,44 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role === "doctor") {
+      return res.status(403).json({ message: "Doctors must use the doctor login portal." });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    await issueOtp(user);
+
+    res.json({
+      message: "OTP sent to email. Please verify to login.",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ====================== DOCTOR LOGIN ======================
+export const loginDoctor = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const cleanEmail = email?.trim();
+
+    if (!cleanEmail || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    if (user.role !== "doctor") {
+      return res.status(403).json({ message: "Access denied. Doctor account required." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -142,6 +191,7 @@ export const verifyOTP = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {

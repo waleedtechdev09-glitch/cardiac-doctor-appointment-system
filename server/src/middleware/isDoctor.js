@@ -14,7 +14,7 @@ const isDoctor = (req, res, next) => {
       });
     }
 
-    // next();
+    next();
   } catch (error) {
     return res.status(500).json({
       success: false,

@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 
-const authRoutes = new Set(["/login", "/register", "/verify-otp"]);
+const authRoutes = new Set(["/login", "/register", "/verify-otp", "/doctor/login", "/doctor/register", "/doctor/dashboard"]);
 
 const ConditionalNavbar = () => {
   const pathname = usePathname();

@@ -15,15 +15,18 @@ const Navbar = () => {
 
   // Home page check logic
   const isHomePage = pathname === "/";
+  const isDoctorRoute = pathname.startsWith("/doctor");
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
     const syncAuthState = () => {
+      const rawUser = window.localStorage.getItem("authUser");
+
       setIsAuthenticated(
         Boolean(window.localStorage.getItem("authToken")) &&
-          Boolean(window.localStorage.getItem("authUser")),
+          Boolean(rawUser),
       );
     };
 
@@ -38,13 +41,12 @@ const Navbar = () => {
   }, []);
 
   // Background color logic
-  // Agar Home page hai to scroll pe change ho, varna hamesha solid rahe
   const navBg =
-    !isHomePage || isScrolled
+    isDoctorRoute || !isHomePage || isScrolled
       ? "bg-white border-b border-slate-100 py-3 shadow-md"
       : "bg-transparent py-6";
 
-  const textColor = !isHomePage || isScrolled ? "text-slate-900" : "text-white";
+  const textColor = isDoctorRoute || !isHomePage || isScrolled ? "text-slate-900" : "text-white";
   const linkColor =
     !isHomePage || isScrolled
       ? "text-slate-600 hover:text-red-600"
@@ -88,14 +90,25 @@ const Navbar = () => {
         </div>
 
         {/* ACTIONS */}
-        <div className="hidden md:flex items-center gap-5">
-          <Button asChild className="bg-red-600 cursor-pointer hover:bg-red-700 text-white rounded-lg font-bold px-6 h-11 shadow-lg shadow-red-600/20 flex gap-2 active:scale-95 transition-all">
-            <Link href={isAuthenticated ? "/profile" : "/login"} className="flex items-center gap-2">
-              <User className="w-4 h-4" />
-              {isAuthenticated ? "Profile" : "Patient Login"}
-            </Link>
-          </Button>
-        </div>
+        {isDoctorRoute ? (
+          <div className="hidden md:flex items-center gap-5">
+            <Button asChild className="bg-slate-900 cursor-pointer hover:bg-slate-800 text-white rounded-lg font-bold px-6 h-11 shadow-lg shadow-slate-900/20 flex gap-2 active:scale-95 transition-all">
+              <Link href="/doctor/login" className="flex items-center gap-2">
+                <HeartPulse className="w-4 h-4" />
+                Doctor Login
+              </Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="hidden md:flex items-center gap-5">
+            <Button asChild className="bg-red-600 cursor-pointer hover:bg-red-700 text-white rounded-lg font-bold px-6 h-11 shadow-lg shadow-red-600/20 flex gap-2 active:scale-95 transition-all">
+              <Link href={isAuthenticated ? "/profile" : "/login"} className="flex items-center gap-2">
+                <User className="w-4 h-4" />
+                {isAuthenticated ? "Profile" : "Patient Login"}
+              </Link>
+            </Button>
+          </div>
+        )}
 
         {/* MOBILE TOGGLE */}
         <button

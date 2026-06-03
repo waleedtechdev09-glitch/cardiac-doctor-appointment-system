@@ -9,6 +9,9 @@ const hiddenFooterRoutes = new Set([
   "/verify-otp",
   "/booking",
   "/booking-successful",
+  "/doctor/login",
+  "/doctor/register",
+  "/doctor/dashboard",
 ]);
 
 const ConditionalFooter = () => {
