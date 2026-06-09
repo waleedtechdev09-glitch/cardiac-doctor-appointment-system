@@ -15,7 +15,7 @@ dotenv.config();
 const app = express();
 
 // middlewares
-app.use(cors());
+app.use(cors("localhost:3000"));
 app.use(express.json());
 app.use(morgan("dev"));
 
