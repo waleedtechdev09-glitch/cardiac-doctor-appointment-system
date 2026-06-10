@@ -23,9 +23,9 @@ const AuthBackButton = () => {
       size="icon"
       onClick={handleBack}
       aria-label="Go back"
-      className="absolute left-4 top-4 z-20 rounded-full bg-white/90 text-slate-700 shadow-lg shadow-slate-200/60 backdrop-blur hover:bg-white hover:text-slate-950 md:left-6 md:top-6"
+      className="absolute left-4 top-4 z-20  text-red-700   hover:text-red-800 md:left-6 md:top-6"
     >
-      <ArrowLeft className="h-5 w-5" />
+      <ArrowLeft className="h-12 w-12" />
     </Button>
   );
 };

@@ -148,10 +148,10 @@ const VerifyOtpForm = () => {
 
   return (
     <>
-      {/* Full screen loader shows during submission */}
       {isSubmitting && <FullScreenLoader />}
 
-      <div className="flex min-h-screen w-full items-center justify-center bg-[#f8fafc] p-0 md:p-6 lg:p-8">
+      {/* Main Base Wrapper - Fluid padding handling on mobile viewports */}
+      <div className="relative flex min-h-screen w-full items-center justify-center bg-slate-50/50 p-4 sm:p-6 md:p-8">
         <ToastContainer
           position="top-right"
           theme="colored"
@@ -160,117 +160,119 @@ const VerifyOtpForm = () => {
           pauseOnHover={false}
         />
 
-        <div className="grid min-h-[720px] w-full max-w-[1200px] grid-cols-1 overflow-hidden border border-slate-100 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] md:grid-cols-2 md:rounded-3xl">
-          <form
-            className="flex w-full flex-col justify-center p-10 md:p-14 lg:p-20"
-            onSubmit={handleSubmit}
-          >
-            <CardHeader className="mb-10 space-y-3 p-0">
-              <div
-                className={`mx-auto mb-2 w-fit rounded-2xl p-4 shadow-sm transition-all duration-300 md:mx-0 ${colors.iconBg}`}
-              >
-                <ShieldCheck
-                  className={`${sizing.iconSize} ${colors.textPrimary}`}
-                />
-              </div>
+        {/* Outer Split Card Container - Fixed desktop max configurations matched */}
+        <div className="grid min-h-0 md:min-h-170 w-full max-w-285 grid-cols-1 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:grid-cols-2">
+          {/* Left Block: Interactive Form Side with clean mobile spacing alignment */}
+          <div className="flex w-full flex-col justify-center px-5 py-10 sm:px-10 md:px-14 lg:px-16">
+            <form
+              className="w-full max-w-105 mx-auto space-y-5 sm:space-y-6"
+              onSubmit={handleSubmit}
+            >
+              {/* Card Header Section inside Form */}
+              <CardHeader className="space-y-2 text-center md:text-left p-0 mb-4 md:mb-6">
+                <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+                  Verify Identity
+                </CardTitle>
 
-              <CardTitle className="text-center text-3xl font-black tracking-tight text-slate-900 md:text-left md:text-4xl">
-                Verify Identity
-              </CardTitle>
+                <CardDescription className="text-xs sm:text-sm leading-relaxed text-slate-500 max-w-[340px] mx-auto md:mx-0">
+                  We&apos;ve sent a 6-digit access code to{" "}
+                  <span className="font-medium text-red-600">
+                    {email || "your registered email"}
+                  </span>
+                  .
+                </CardDescription>
+              </CardHeader>
 
-              <CardDescription className="text-center text-base leading-relaxed text-slate-500 md:text-left">
-                We&apos;ve sent a 6-digit access code to{" "}
-                <span className="font-medium text-red-600">
-                  {email || "your registered email"}
-                </span>
-                .
-              </CardDescription>
-            </CardHeader>
+              {/* Card Content Data Entry Input Fields Area */}
+              <CardContent className="p-0">
+                <div className="space-y-3.5">
+                  <Label className="block text-center text-xs font-medium tracking-wide text-slate-700 md:text-left">
+                    Enter 6-Digit Code
+                  </Label>
 
-            <CardContent className="space-y-8 p-0">
-              <div className="space-y-4">
-                <Label className="ml-1 block text-center text-[13px] font-bold uppercase tracking-wider text-slate-500 md:text-left">
-                  Enter 6-Digit Code
-                </Label>
-
-                <div
-                  className="flex justify-center gap-2.5 md:justify-start md:gap-3"
-                  onPaste={handlePaste}
-                >
-                  {otp.map((digit, index) => (
-                    <Input
-                      key={index}
-                      ref={(element) => {
-                        inputRefs.current[index] = element;
-                      }}
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      maxLength={1}
-                      value={digit}
-                      disabled={isSubmitting}
-                      onChange={(event) =>
-                        handleChange(event.target.value, index)
-                      }
-                      onKeyDown={(event) => handleKeyDown(event, index)}
-                      className="h-14 w-11 rounded-xl border-2 border-slate-200 bg-slate-50 text-center text-2xl font-black shadow-sm transition-all focus:border-red-500 focus:ring-red-100 disabled:opacity-50 md:h-16 md:w-14"
-                      placeholder="-"
-                    />
-                  ))}
-                </div>
-
-                <p className="pt-2 text-center text-sm text-slate-500 md:text-left">
-                  Didn&apos;t receive the code?{" "}
-                  <button
-                    type="button"
-                    className={`${colors.textPrimary} font-bold hover:underline`}
-                    disabled={isSubmitting}
-                    onClick={() =>
-                      router.push(
-                        email
-                          ? `/login?email=${encodeURIComponent(email)}${loginRole === "doctor" ? "&role=doctor" : ""}`
-                          : loginRole === "doctor"
-                            ? "/login?role=doctor"
-                            : "/login",
-                      )
-                    }
+                  {/* OTP Grid Structure - Tailored beautifully for fluid widths on ultra thin screens */}
+                  <div
+                    className="flex justify-center gap-1.5 sm:gap-2.5 md:justify-start md:gap-3"
+                    onPaste={handlePaste}
                   >
-                    Request a new code
-                  </button>
-                </p>
-              </div>
-            </CardContent>
+                    {otp.map((digit, index) => (
+                      <Input
+                        key={index}
+                        ref={(element) => {
+                          inputRefs.current[index] = element;
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={1}
+                        value={digit}
+                        disabled={isSubmitting}
+                        onChange={(event) =>
+                          handleChange(event.target.value, index)
+                        }
+                        onKeyDown={(event) => handleKeyDown(event, index)}
+                        className="h-12 w-9 rounded-lg border border-slate-200 bg-slate-50/30 text-center text-xl font-bold text-slate-900 transition-colors focus:border-slate-400 focus:bg-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50 sm:h-14 sm:w-11 md:h-16 md:w-14"
+                        placeholder="-"
+                      />
+                    ))}
+                  </div>
 
-            <CardFooter className="mt-12 flex flex-col space-y-6 p-0">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full cursor-pointer rounded-md text-base font-medium text-white shadow-lg transition-all active:scale-[0.98] ${colors.primary} ${colors.primaryHover} ${sizing.inputHeight}`}
-              >
-                {isSubmitting ? "Verifying..." : "Verify and Access"}
-              </Button>
+                  <p className="pt-2 text-center text-xs text-slate-500 md:text-left">
+                    Didn&apos;t receive the code?{" "}
+                    <button
+                      type="button"
+                      className={`${colors.textPrimary} font-medium underline-offset-4 hover:underline`}
+                      disabled={isSubmitting}
+                      onClick={() =>
+                        router.push(
+                          email
+                            ? `/login?email=${encodeURIComponent(email)}${loginRole === "doctor" ? "&role=doctor" : ""}`
+                            : loginRole === "doctor"
+                              ? "/login?role=doctor"
+                              : "/login",
+                        )
+                      }
+                    >
+                      Request a new code
+                    </button>
+                  </p>
+                </div>
+              </CardContent>
 
-              <Link
-                href={loginRole === "doctor" ? "/login?role=doctor" : "/login"}
-                className="group flex items-center justify-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 md:justify-start"
-              >
-                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                Back to{" "}
-                {loginRole === "doctor" ? "Doctor Login" : "Secure Login"}
-              </Link>
-            </CardFooter>
-          </form>
+              {/* Card Footer Section - Clean action buttons layout */}
+              <CardFooter className="pt-2 flex flex-col space-y-4 p-0 text-center md:text-left">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full cursor-pointer rounded-md text-sm font-medium text-white transition-all duration-200 hover:opacity-95 active:scale-[0.99] ${colors.primary} ${colors.primaryHover} ${sizing.inputHeight}`}
+                >
+                  {isSubmitting ? "Verifying..." : "Verify and Access"}
+                </Button>
 
-          <div className="relative hidden items-center justify-center overflow-hidden bg-blue-950 p-12 md:flex">
-            <div className="absolute h-[500px] w-[500px] animate-pulse rounded-full bg-red-600/10 blur-[120px]" />
+                <Link
+                  href={
+                    loginRole === "doctor" ? "/login?role=doctor" : "/login"
+                  }
+                  className="group flex items-center justify-center gap-1.5 text-xs font-medium text-slate-500 transition-colors hover:text-slate-800 md:justify-start"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+                  Back to{" "}
+                  {loginRole === "doctor" ? "Doctor Login" : "Secure Login"}
+                </Link>
+              </CardFooter>
+            </form>
+          </div>
 
-            <div className="relative aspect-square h-[450px] w-[450px]">
+          {/* Right Block: Minimal Corporate Banner matched to standard split design */}
+          <div className="hidden h-full items-center justify-center bg-red-400 p-8 md:flex">
+            <div className="relative flex h-full w-full max-w-[320px] items-center justify-center">
               <Image
                 src="/Cardiologist.png"
-                alt="Secure Verification"
-                fill
+                alt="Cardiologist Illustration"
+                width={320}
+                height={320}
+                className="object-contain opacity-90 brightness-95 filter drop-shadow-sm"
                 priority
-                className="object-contain drop-shadow-2xl transition-transform duration-700 hover:scale-105"
               />
             </div>
           </div>
