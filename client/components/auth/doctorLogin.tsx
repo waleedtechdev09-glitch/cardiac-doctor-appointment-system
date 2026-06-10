@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -17,7 +18,7 @@ import FullScreenLoader from "../Loader";
 
 const DoctorLoginForm = () => {
   const router = useRouter();
-  const { colors, sizing } = APP_CONFIG;
+  const { colors, sizing, name } = APP_CONFIG;
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,10 +100,10 @@ const DoctorLoginForm = () => {
 
   return (
     <>
-      {/* Full screen loader shows during submission */}
       {isSubmitting && <FullScreenLoader />}
 
-      <div className="relative flex min-h-screen w-full items-center justify-center bg-[#f8fafc] p-0 md:p-6 lg:p-8">
+      {/* Main Base Wrapper - Fluid padding handling on mobile viewports */}
+      <div className="relative flex min-h-screen w-full items-center justify-center bg-slate-50/50 p-4 sm:p-6 md:p-8">
         <AuthBackButton />
 
         <ToastContainer
@@ -113,104 +114,116 @@ const DoctorLoginForm = () => {
           pauseOnHover={false}
         />
 
-        <div className="grid min-h-[720px] w-full max-w-[1200px] grid-cols-1 overflow-hidden border border-slate-100 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] md:grid-cols-2 md:rounded-3xl">
-          <form
-            className="flex w-full flex-col justify-center p-10 md:p-14 lg:p-20"
-            onSubmit={handleSubmit}
-          >
-            <div className="mb-10 space-y-3 p-0">
-              <div
-                className={`mx-auto mb-2 w-fit rounded-full p-4 shadow-sm transition-all duration-300 md:mx-0 ${colors.iconBg}`}
-              >
-                <span
-                  className={`${sizing.iconSize} ${colors.textPrimary}`}
-                ></span>
+        {/* Outer Split Card Container - Responsive mobile min-height protection applied */}
+        <div className="grid min-h-0 md:min-h-170 w-full max-w-285 grid-cols-1 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:grid-cols-2">
+          {/* Left Block: Interactive Form Side with optimized padding on mobile */}
+          <div className="flex w-full flex-col justify-center overflow-y-auto px-5 py-10 sm:px-10 md:px-14 lg:px-16 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <form
+              className="w-full max-w-105 mx-auto space-y-5 sm:space-y-6"
+              onSubmit={handleSubmit}
+            >
+              {/* Header Info - Center text on mobile screens for better aesthetics */}
+              <div className="space-y-2 text-center md:text-left mb-6 md:mb-10">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+                  Doctor Portal Login
+                </h2>
+                <p className="text-xs sm:text-sm leading-relaxed text-slate-500 max-w-[320px] mx-auto md:mx-0">
+                  Log in to your{" "}
+                  <span className="font-medium text-red-600">{name}</span>{" "}
+                  professional dashboard and manage appointment requests.
+                </p>
               </div>
 
-              <h2 className="text-center text-3xl font-black tracking-tight text-slate-900 md:text-left md:text-4xl">
-                Doctor Login
-              </h2>
-              <p className="text-center text-base leading-relaxed text-slate-500 md:text-left">
-                Log in to your doctor dashboard and manage appointment requests.
-              </p>
-            </div>
-
-            <div className="space-y-6 p-0">
-              <div className="space-y-2">
-                <Label
-                  htmlFor="email"
-                  className="ml-1 text-[13px] font-bold uppercase tracking-wider text-slate-500"
-                >
-                  Doctor Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange("email")}
-                  disabled={isSubmitting}
-                  className={`w-full ${sizing.inputHeight} rounded-xl border-slate-200 bg-slate-50/50 transition-all focus:border-red-500 focus:ring-red-100`}
-                  placeholder="doctor.smith@cardio-care.com"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="password"
-                  className="ml-1 text-[13px] font-bold uppercase tracking-wider text-slate-500"
-                >
-                  Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={form.password}
-                    onChange={handleChange("password")}
-                    disabled={isSubmitting}
-                    className={`w-full ${sizing.inputHeight} rounded-xl border-slate-200 bg-slate-50/50 transition-all focus:border-red-500 focus:ring-red-100 pr-12`}
-                    placeholder="Enter password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    disabled={isSubmitting}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 disabled:opacity-50"
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
+              {/* Data Input Fields Area */}
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="email"
+                    className="text-xs font-medium tracking-wide text-slate-700"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
+                    Doctor Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleChange("email")}
+                    className={`w-full ${sizing.inputHeight} rounded-md border-slate-200 bg-slate-50/30 text-sm transition-colors focus:border-slate-400 focus:bg-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0`}
+                    placeholder="doctor.smith@cardio-care.com"
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="password"
+                    className="text-xs font-medium tracking-wide text-slate-700"
+                  >
+                    Password
+                  </Label>
+                  <div className="relative flex items-center">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={form.password}
+                      onChange={handleChange("password")}
+                      className={`w-full ${sizing.inputHeight} rounded-md border-slate-200 bg-slate-50/30 pr-10 text-sm transition-colors focus:border-slate-400 focus:bg-white focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0`}
+                      placeholder="Enter password"
+                      disabled={isSubmitting}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 outline-none transition-colors hover:text-slate-600 focus-visible:text-slate-600 disabled:opacity-50"
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                      disabled={isSubmitting}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="mt-12 flex flex-col space-y-6 p-0">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className={`flex w-full cursor-pointer gap-3 rounded-md text-base font-medium text-white shadow-[0_10px_20px_rgba(220,38,38,0.2)] transition-all active:scale-[0.98] ${colors.primary} ${colors.primaryHover} ${sizing.inputHeight}`}
-              >
-                {isSubmitting ? "Sending code..." : "Secure Login"}
-              </Button>
-            </div>
-          </form>
+              {/* CTAs and Routing Links */}
+              <div className="pt-1 space-y-4 text-center md:text-left">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full cursor-pointer rounded-md text-sm font-medium text-white transition-all duration-200 hover:opacity-95 active:scale-[0.99] ${colors.primary} ${colors.primaryHover} ${sizing.inputHeight}`}
+                >
+                  {isSubmitting ? "Sending code..." : "Secure Login"}
+                </Button>
 
-          <div className="relative hidden items-center justify-center overflow-hidden bg-blue-950 p-12 md:flex">
-            <div className="relative aspect-square h-[450px] w-[450px]">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Image
-                  src="/Cardiologist.png"
-                  alt="Doctor Login"
-                  width={400}
-                  height={400}
-                />
+                <p className="text-sm text-slate-500">
+                  Don&apos;t have an account?{" "}
+                  <Link
+                    href="/doctor/register"
+                    className={`${colors.textPrimary} font-medium `}
+                  >
+                    Register for {name}
+                  </Link>
+                </p>
               </div>
+            </form>
+          </div>
+
+          {/* Right Block: Fixed Banner Side matched to Patient layout */}
+          <div className="hidden h-full items-center justify-center bg-red-400 p-8 md:flex">
+            <div className="relative flex h-full w-full max-w-[320px] items-center justify-center">
+              <Image
+                src="/Cardiologist.png"
+                alt="Cardiologist Illustration"
+                width={320}
+                height={320}
+                className="object-contain opacity-90 brightness-95 filter drop-shadow-sm"
+                priority
+              />
             </div>
           </div>
         </div>
